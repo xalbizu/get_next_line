@@ -6,7 +6,7 @@
 /*   By: xalbizu- <xalbizu-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 10:55:25 by xalbizu-          #+#    #+#             */
-/*   Updated: 2022/04/27 15:59:28 by xalbizu-         ###   ########.fr       */
+/*   Updated: 2022/04/27 18:24:44 by xalbizu-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,20 @@ char	*get_next_line(int fd)
 	if (!result)
 		return (0);
 	i = 0;
-	while (buf[linestart] != '\n')
+	while (buf[linestart] != '\n' && buf[linestart])
 	{
 		result[i] = buf[linestart];
 		linestart++;
 		i++;
 	}
+	if (buf[linestart])
 	result[i] = buf[linestart];
+	if (buf[linestart + 1])
+		linestart += 1;
 	free(buf);
-	linestart += 1;
 	return (result);
 }
-/* 
+
 int	main(void)
 {
 	int	fd;
@@ -58,4 +60,4 @@ int	main(void)
 	fd = open("fd.dict", O_RDONLY);
 	printf("%s", get_next_line(fd));
 	return (0);
-} */
+}
