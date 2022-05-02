@@ -42,7 +42,9 @@ char	*get_next_line(int fd)
 		i++;
 	}
 	if (buf[linestart])
-	result[i] = buf[linestart];
+		result[i] = buf[linestart];
+	else
+		result[i] = '\0';
 	if (buf[linestart + 1])
 		linestart += 1;
 	free(buf);
