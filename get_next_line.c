@@ -6,7 +6,7 @@
 /*   By: xalbizu- <xalbizu-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/04/27 10:55:25 by xalbizu-          #+#    #+#             */
-/*   Updated: 2022/04/27 18:24:44 by xalbizu-         ###   ########.fr       */
+/*   Updated: 2022/06/08 13:52:47 by xalbizu-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,52 +14,89 @@
 
 char	*get_next_line(int fd)
 {
-	size_t		nr_bytes;
-	char		*buf;
-	static int	linestart = 0;
-	char		*result;
-	int			i;
+	static char	buf[BUFFER_SIZE + 1];
+	char		*line;
+	int			nr_bytes;
+	char		*tmp;
 
-	if (fd == -1)
+	if (fd < 0 || BUFFER_SIZE < 0)
 		return (0);
-	buf = (char *)malloc(BUFFER_SIZE * sizeof(char *));
-	if (!buf)
-		return (0);
-	nr_bytes = read(fd, buf, BUFFER_SIZE);
-	if (!buf[linestart])
+	line = ft_strndup(buf, ft_strlen(buf));
+	nr_bytes = 1;
+	while (nr_bytes && !ft_findchar(buf) && !ft_findchar(line))
 	{
-		free(buf);
-		return (0);
+		nr_bytes = read(fd, buf, 1);
+		if (nr_bytes < 0)
+			return (0);
+		if (nr_bytes == 0 && !line)
+			return (0);
+		buf[nr_bytes] = '\0';
+		tmp = ft_strjoin(line, buf);
+		free(line);
+		line = tmp;
 	}
-	result = (char *)malloc(linelen(buf, linestart) * sizeof(char *));
-	if (!result)
-		return (0);
-	i = 0;
-	while (buf[linestart] != '\n' && buf[linestart])
+	buffer(buf, BUFFER_SIZE);
+	updateline(line, ft_strlen(line));
+	return (line);
+}
+
+void	updateline(char *line, int size)
+{
+	int	cont;
+
+	cont = 0;
+	if (!line)
+		return ;
+	while (line[cont] && line[cont] != '\n')
+		cont++;
+	if (line[cont] == '\n')
+		cont++;
+	while (cont < size && line[cont])
 	{
-		result[i] = buf[linestart];
-		linestart++;
+		line[cont] = '\0';
+		cont++;
+	}
+}
+
+void	buffer(char *buf, int size)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	j = 0;
+	while (buf[i] && buf[j] != '\n')
+		i++;
+	if (buf[i] == '\n')
+	{
+		buf[j] = buf[++i];
+		j++;
 		i++;
 	}
-	if (buf[linestart])
-		result[i] = buf[linestart];
-	else
-		result[i] = '\0';
-	if (buf[linestart + 1])
-		linestart += 1;
-	free(buf);
-	return (result);
+	while (i < size && buf[j])
+	{
+		buf[j] = buf[i];
+		i++;
+		j++;
+	}
+	while (j < size && buf[j])
+	{
+		buf[j] = '\0';
+		j++;
+	}
 }
 
 int	main(void)
 {
-	int	fd;
-
-	fd = open("fd.dict", O_RDONLY);
-	printf("%s", get_next_line(fd));
-	fd = open("fd.dict", O_RDONLY);
-	printf("%s", get_next_line(fd));
-	fd = open("fd.dict", O_RDONLY);
-	printf("%s", get_next_line(fd));
+	ssize_t	fd = open("fd.txt", O_RDONLY);
+	size_t	i = 3;
+	char	*line;
+	while (i--)
+	{
+		line = get_next_line(fd);
+		printf("line %zu = %s", i, line);
+		free(line);
+	}
+	close(fd);
 	return (0);
 }
